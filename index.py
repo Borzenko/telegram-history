@@ -95,3 +95,31 @@ async def main():
 
 if __name__ == '__main__':
     client.loop.run_until_complete(main())
+
+async def joinChannel(joinLink, isPrivate=False):
+    print(isPrivate)
+    print(joinLink)
+    from telethon.tl.functions.messages import ImportChatInviteRequest
+    from telethon.tl.functions.channels import JoinChannelRequest
+    if (isPrivate):
+        res = await client(ImportChatInviteRequest(joinLink))
+    else:
+        res = await client(JoinChannelRequest(joinLink))
+    
+    channel = res.chats[0]
+    # tst = await client(GetFullChannelRequest(channel=channel))
+    count = ( await client.get_participants(channel.id, limit=0)).total
+    
+    print({ "channel_id": channel.id,
+        "history": [{
+            "title": channel.title,
+            "count": count
+        }]
+    })
+
+    return { "channel_id": channel.id,
+        "history": [{
+            "title": channel.title,
+            "count": count
+        }]
+    }
