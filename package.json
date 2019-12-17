@@ -13,6 +13,8 @@
     "mongodb": "^3.4.0"
   },
   "dependencies": {
-    "body-parser": "^1.19.0"
+    "@hapi/joi": "^16.1.8",
+    "body-parser": "^1.19.0",
+    "request-promise": "^4.2.5"
   }
 }

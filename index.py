@@ -89,15 +89,11 @@ def getPosts():
     result = dumps(mycol.find())
     return result
 
-
-async def main():
-    await hypercorn.asyncio.serve(app, hypercorn.Config())
-
-if __name__ == '__main__':
-    client.loop.run_until_complete(main())
-
 @app.route('/join-channel', methods=['POST'])
-async def joinChannel(joinLink, isPrivate=False):
+async def joinChannel():
+    req = await request.get_json()
+    isPrivate = req['private'] == 'true' if True else False
+    joinLink = req['link']
     print(isPrivate)
     print(joinLink)
     from telethon.tl.functions.messages import ImportChatInviteRequest
@@ -124,3 +120,9 @@ async def joinChannel(joinLink, isPrivate=False):
             "count": count
         }]
     }
+
+async def main():
+    await hypercorn.asyncio.serve(app, hypercorn.Config())
+
+if __name__ == '__main__':
+    client.loop.run_until_complete(main())
