@@ -69,7 +69,7 @@ async def syncData():
     channels = mycol.find()
     for channel in channels: 
 
-        channel_entity= await client.get_entity(channel.get('channel_id'))
+        channel_entity = await client.get_entity(channel.get('channel_id'))
         print(channel_entity)
         count = ( await client.get_participants(channel.get('channel_id'), limit=0)).total
     
@@ -96,6 +96,7 @@ async def main():
 if __name__ == '__main__':
     client.loop.run_until_complete(main())
 
+@app.route('/join-channel', methods=['POST'])
 async def joinChannel(joinLink, isPrivate=False):
     print(isPrivate)
     print(joinLink)
@@ -108,7 +109,7 @@ async def joinChannel(joinLink, isPrivate=False):
     
     channel = res.chats[0]
     # tst = await client(GetFullChannelRequest(channel=channel))
-    count = ( await client.get_participants(channel.id, limit=0)).total
+    count = (await client.get_participants(channel.id, limit=0)).total
     
     print({ "channel_id": channel.id,
         "history": [{
