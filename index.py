@@ -92,33 +92,29 @@ def getPosts():
 @app.route('/join-channel', methods=['POST'])
 async def joinChannel():
     req = await request.get_json()
-    isPrivate = req['private'] == 'true' if True else False
+    isPrivate = req['private']
     joinLink = req['link']
-    print(isPrivate)
-    print(joinLink)
     from telethon.tl.functions.messages import ImportChatInviteRequest
     from telethon.tl.functions.channels import JoinChannelRequest
     if (isPrivate):
         res = await client(ImportChatInviteRequest(joinLink))
     else:
         res = await client(JoinChannelRequest(joinLink))
-    
-    channel = res.chats[0]
-    # tst = await client(GetFullChannelRequest(channel=channel))
-    count = (await client.get_participants(channel.id, limit=0)).total
-    
-    print({ "channel_id": channel.id,
-        "history": [{
-            "title": channel.title,
-            "count": count
-        }]
-    })
 
-    return { "channel_id": channel.id,
-        "history": [{
-            "title": channel.title,
-            "count": count
-        }]
+    return { "test": 'works' }
+
+from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.types import PeerChannel 
+@app.route('/get-channel-data/<int:id>', methods=['GET'])
+async def getChannelInfo(id):
+    channel = await client.get_entity(PeerChannel(id))
+    chat_request = await client(GetFullChannelRequest(channel=channel))
+    chat_full = chat_request.full_chat.about
+    count = (await client.get_participants(id, limit=0)).total
+    return {
+        "title": channel.title,
+        "description": chat_full,
+        "count": count
     }
 
 async def main():
