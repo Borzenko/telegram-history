@@ -27,13 +27,15 @@ app.post('/join-channel', async ({ body }, res) => {
                 private: channel.private
             },
             json: true
-        };
-        rp(options).then(response => {
-            db.collection('channels').insert(response)
-            res.send(response)
-        }).catch(err => {
-            res.json(err)
-        })
+        }
+    const request = rp(options)
+    const result = await request
+    const checkChannelInDB = db.collection('channels').findOne({'channel_id': result.channel_id})
+    if (checkChannelInDB === null) {
+        res.json(response)
+        return db.collection('channels').insert(response)
+    }
+    return res.json({'error': 'Already exist'})
 
     }
 });
@@ -43,12 +45,10 @@ app.get('/get-channel-data/:id', async (req, res) => {
         uri: `http://127.0.0.1:8000/get-channel-data/${req.params.id}`,
         json: true
     };
-    rp(options).then(async response => {
-        await db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push': {'history': response}}, { "upsert": false })
-        res.json(response)
-    }).catch(err => {
-        res.json(err)
-    })
+    const request = rp(options)
+    const result = await request
+    db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push': {'history': result}}, { "upsert": false })
+    res.json({'message': 'Channel updated'})
 })
 
 app.listen(3000, async () => {
