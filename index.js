@@ -53,7 +53,10 @@ app.get('/get-channel-data/:id', async (req, res) => {
     {'updateTime': new Date()}}, { "upsert": true })
     res.json({'message': 'Channel updated'})
 })
-
+app.delete('/delete-channel/:id', async (req, res) => {
+    const result = await db.collection('channels').remove({channel_id: parseInt(req.params.id)})
+    res.json(result)
+})
 app.listen(3000, async () => {
     console.log('Server is working on 3000')
     db = await connectToDatabase().catch((err) => {
