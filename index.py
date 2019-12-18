@@ -101,7 +101,15 @@ async def joinChannel():
     else:
         res = await client(JoinChannelRequest(joinLink))
 
-    return { "test": 'works' }
+    channel = res.chats[0]
+    count = ( await client.get_participants(channel.id, limit=0)).total
+
+    return { "channel_id": channel.id,
+        "history": [{
+            "title": channel.title,
+            "count": count
+        }]
+    }
 
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import PeerChannel 

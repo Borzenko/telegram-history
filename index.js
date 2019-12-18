@@ -43,7 +43,8 @@ app.get('/get-channel-data/:id', async (req, res) => {
         uri: `http://127.0.0.1:8000/get-channel-data/${req.params.id}`,
         json: true
     };
-    rp(options).then(response => {
+    rp(options).then(async response => {
+        await db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push': {'history': response}}, { "upsert": false })
         res.json(response)
     }).catch(err => {
         res.json(err)
