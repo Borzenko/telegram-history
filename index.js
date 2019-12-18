@@ -18,26 +18,27 @@ app.post('/join-channel', async ({ body }, res) => {
         private: body.private
     }
     const validationResult = joinChannelSchema.validate(channel)
-    if (!validationResult.error) {
-        const options = {
-            method: 'POST',
-            uri: 'http://127.0.0.1:8000/join-channel',
-            body: {
-                link: channel.link,
-                private: channel.private
-            },
-            json: true
-        }
-    const request = rp(options)
-    const result = await request
-    const checkChannelInDB = db.collection('channels').findOne({'channel_id': result.channel_id})
-    if (checkChannelInDB === null) {
-        res.json(response)
-        return db.collection('channels').insert(response)
+    if (validationResult.error) { res.json(validationResult) }
+    
+    const options = {
+        method: 'POST',
+        uri: 'http://127.0.0.1:8000/join-channel',
+        body: {
+            link: channel.link,
+            private: channel.private
+        },
+        json: true
     }
-    return res.json({'error': 'Already exist'})
-
+    const response = await rp(options)
+    if (response.error) {
+        return res.json({'error': response.error})
     }
+    const checkChannelInDB = await db.collection('channels').findOne({'channel_id': response.channel_id})
+    if (!checkChannelInDB) {
+        db.collection('channels').insert(response)
+        return res.json(response)
+    }
+    return res.json(checkChannelInDB)
 });
 app.get('/get-channel-data/:id', async (req, res) => {
     const options = {
@@ -45,9 +46,11 @@ app.get('/get-channel-data/:id', async (req, res) => {
         uri: `http://127.0.0.1:8000/get-channel-data/${req.params.id}`,
         json: true
     };
-    const request = rp(options)
-    const result = await request
-    db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push': {'history': result}}, { "upsert": false })
+    const result = await rp(options)
+    db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push':
+    {'history': result}}, { "upsert": true })
+    db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$set':
+    {'updateTime': new Date()}}, { "upsert": true })
     res.json({'message': 'Channel updated'})
 })
 

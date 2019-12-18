@@ -16,7 +16,11 @@ from bson.json_util import dumps
 from telethon import TelegramClient, utils
 from telethon.tl.functions.channels import GetFullChannelRequest
 import eventlet
-
+from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.types import PeerChannel
+from telethon.tl.functions.messages import ImportChatInviteRequest
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon import errors
 # Telethon client
 client = TelegramClient('79192868958', api_id, api_hash)
 client.start()
@@ -91,39 +95,55 @@ def getPosts():
 
 @app.route('/join-channel', methods=['POST'])
 async def joinChannel():
-    req = await request.get_json()
-    isPrivate = req['private']
-    joinLink = req['link']
-    from telethon.tl.functions.messages import ImportChatInviteRequest
-    from telethon.tl.functions.channels import JoinChannelRequest
-    if (isPrivate):
-        res = await client(ImportChatInviteRequest(joinLink))
-    else:
-        res = await client(JoinChannelRequest(joinLink))
+    try:
+        req = await request.get_json()
 
-    channel = res.chats[0]
-    count = ( await client.get_participants(channel.id, limit=0)).total
+        joinLink = req['link']
+        isPrivate = False
 
-    return { "channel_id": channel.id,
-        "history": [{
-            "title": channel.title,
-            "count": count
-        }]
-    }
+        if(len(joinLink.split("joinchat/",1)) == 2):
+            link = joinLink.split("joinchat/",1)[1]
+            isPrivate = True
+        else:
+            link = joinLink.split("https://tmtr.me/",1)[1]
 
-from telethon.tl.functions.channels import GetFullChannelRequest
-from telethon.tl.types import PeerChannel 
+        if (isPrivate):
+            res = await client(ImportChatInviteRequest(link))
+        else:
+            res = await client(JoinChannelRequest(link))
+
+        channel = res.chats[0]
+        count = ( await client.get_participants(channel.id, limit=0)).total
+
+        return { "channel_id": channel.id,
+            "history": [{
+                "title": channel.title,
+                "count": count
+            }]
+        }
+    except telethon.errors.rpcerrorlist.UserAlreadyParticipantError: 
+        return dumps({ 'error': 'UserAlreadyParticipantError'})
+    except telethon.errors.rpcerrorlist.FloodWaitError:
+        return dumps({ 'error': 'FloodWaitError'})
+    except:
+        e = sys.exc_info()[0]
+        print(e)
+        return dumps({ 'error': 'Error join' })
+
 @app.route('/get-channel-data/<int:id>', methods=['GET'])
 async def getChannelInfo(id):
-    channel = await client.get_entity(PeerChannel(id))
-    chat_request = await client(GetFullChannelRequest(channel=channel))
-    chat_full = chat_request.full_chat.about
-    count = (await client.get_participants(id, limit=0)).total
-    return {
-        "title": channel.title,
-        "description": chat_full,
-        "count": count
-    }
+    try:
+        channel = await client.get_entity(PeerChannel(id))
+        chat_request = await client(GetFullChannelRequest(channel=channel))
+        chat_full = chat_request.full_chat.about
+        count = (await client.get_participants(id, limit=0)).total
+        return {
+            "title": channel.title,
+            "description": chat_full,
+            "count": count
+        }
+    except telethon.errors.rpcerrorlist.FloodWaitError:
+        return dumps({ 'error': 'FloodWaitError'})
 
 async def main():
     await hypercorn.asyncio.serve(app, hypercorn.Config())
