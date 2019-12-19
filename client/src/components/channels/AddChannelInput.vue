@@ -10,6 +10,7 @@
           <v-btn
             outlined
             color='red'
+            class="add-channel-btn"
           >
               Add Channel
           </v-btn>
@@ -34,4 +35,6 @@ export default {
     margin-bottom: 2rem
 .add-channel-input
     padding-right: 20px !important
+.add-channel-btn
+    margin: auto !important
 </style>

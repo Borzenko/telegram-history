@@ -3,8 +3,9 @@ const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser')
 const rp = require('request-promise')
-const Joi = require('@hapi/joi')
+const cors = require('cors')
 app.use(bodyParser.json())
+app.use(cors())
 const joinChannelSchema = require('./validationSchemas/joinChannelSchema')
 
 app.get('/channels', async (req, res) => {
