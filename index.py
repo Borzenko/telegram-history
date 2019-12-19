@@ -21,6 +21,7 @@ from telethon.tl.types import PeerChannel
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon import errors
+from telethon.tl.functions.channels import LeaveChannelRequest
 # Telethon client
 client = TelegramClient('79192868958', api_id, api_hash)
 client.start()
@@ -105,7 +106,7 @@ async def joinChannel():
             link = joinLink.split("joinchat/",1)[1]
             isPrivate = True
         else:
-            link = joinLink.split("https://tmtr.me/",1)[1]
+            link = joinLink.split("https://t.me/",1)[1]
 
         if (isPrivate):
             res = await client(ImportChatInviteRequest(link))
@@ -129,7 +130,7 @@ async def joinChannel():
         e = sys.exc_info()[0]
         print(e)
         return dumps({ 'error': 'Error join' })
-
+from telethon import functions, types
 @app.route('/get-channel-data/<int:id>', methods=['GET'])
 async def getChannelInfo(id):
     try:
@@ -137,6 +138,15 @@ async def getChannelInfo(id):
         chat_request = await client(GetFullChannelRequest(channel=channel))
         chat_full = chat_request.full_chat.about
         count = (await client.get_participants(id, limit=0)).total
+    #     test = await client.get_messages(channel.id, limit=1)
+    #     photo = await client.get_profile_photos(id)
+    #     channel_photo = await client.download_media(photo[0])
+    #     print(photo[0].sizes[0].location)
+    #     result = await client(functions.upload.GetFileRequest(location=photo[0].sizes[0].location,
+    #     limit=1024*1024,
+    #     offset=0
+    # ))
+        # print(test)
         return {
             "title": channel.title,
             "description": chat_full,
@@ -144,6 +154,13 @@ async def getChannelInfo(id):
         }
     except telethon.errors.rpcerrorlist.FloodWaitError:
         return dumps({ 'error': 'FloodWaitError'})
+# @app.route('/delete-channel/<int:id>', methods=['DELETE'])
+# async def deleteChannel(): 
+#     try:
+#         client(functions.messages.DeleteChatUserRequest(
+#         chat_id=chat_id,
+#         user_id='me'
+# ))
 
 async def main():
     await hypercorn.asyncio.serve(app, hypercorn.Config())
