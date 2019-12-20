@@ -7,10 +7,17 @@
             <v-card-title>
                 Channel Info
             </v-card-title>
-            <v-card-text>
-                <span v-for="(channel, index) in channelInfo" :key="index">
-                    <div>{{channel}}</div>
-                </span>
+            <v-card-text v-if="channelInfo">
+                <div v-if="oldChannelInfo">
+                    <span class="bold">Old Channel Info</span>
+                    <span v-for="(channel, index) in Object.keys(oldChannelInfo)" :key="index">
+                        <div>{{channel}} : {{channelInfo[channel]}} </div>
+                    </span>
+                </div>
+                    <span class="bold">New Channel Info</span>
+                    <span v-for="(item, index) in Object.keys(channelInfo)" :key="index">
+                        <div>{{item}} : {{channelInfo[item]}} </div>
+                    </span>
             </v-card-text>
         </v-card>
     </v-dialog>
@@ -26,7 +33,41 @@ export default {
         showModal: {
             type: Boolean,
             default: false
+        },
+        allChannelsInfo: {
+            type: Array,
+            default: () => ([])
         }
+    },
+    data() {
+        return {
+            channelAllData: [],
+            oldChannelInfo: null
+        }
+
+    },
+    methods: {
+        isDataUpdated(newData, oldData) {
+            return Object.keys(oldData).every(key => 
+                oldData[key] === newData[key])
+        },
+        test() {
+        const dataForChannel = this.allChannelsInfo && this.channelInfo ? this.allChannelsInfo.filter(item => item.channel_id === this.channelInfo.channel_id) : []
+        const data = dataForChannel ? dataForChannel[0].history[dataForChannel[0].history.length - 2] : {}
+        this.oldChannelInfo = data
+         const res = data ? this.isDataUpdated(this.channelInfo, data) : false
+         if(!res) {
+             const obj = {
+                 title: data.title,
+                 count: data.count,
+                 description: data.description,
+             }
+             this.oldChannelInfo = obj
+         }
+        }
+    },
+    created() {
+        this.test()
     }
 }
 </script>
@@ -38,5 +79,7 @@ export default {
     position: absolute
     top: 5px
     right: 5px
+.bold
+    font-weight: bold
 
 </style>

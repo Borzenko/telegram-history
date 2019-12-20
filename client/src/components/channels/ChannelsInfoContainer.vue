@@ -6,8 +6,10 @@
             @table-row-clicked="openInfoModal($event)"
         />
         <show-channel-info-modal
+            v-if="allData && test"
             :show-modal="showInfoModal"
             :channel-info="test"
+            :all-channels-info="allData"
             @close-modal="showInfoModal=false"
         />
     </v-flex>
@@ -28,15 +30,18 @@ export default {
         return {
             channels: [],
             test: null,
+            allData: null,
             showInfoModal: false
         }
     },
     methods: {
         async getClientChannels() {
             const res = (await getChannels()).data
+            this.allData = res
             res.forEach(item => {
                 if(item.history.length) {
                     this.channels.push({
+                    channel_id: item.channel_id,
                     title: item.history[item.history.length-1].title,
                     count: item.history[item.history.length-1].count,
                     description: item.history[item.history.length-1].description,
@@ -50,6 +55,7 @@ export default {
             this.test = data
             this.showInfoModal = true
         }
+
     },
     created() {
         this.getClientChannels()
