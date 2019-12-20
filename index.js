@@ -34,7 +34,7 @@ app.post('/join-channel', async ({ body }, res) => {
     if (response.error) {
         return res.json({'error': response.error})
     }
-    const checkChannelInDB = await db.collection('channels').findOne({'channel_id': response.channel_id})
+    const checkChannelInDB = await db.collection('channels').findOne({'channel_id': parseInt(response.channel_id)})
     if (!checkChannelInDB) {
         db.collection('channels').insert(response)
         return res.json(response)
@@ -48,12 +48,23 @@ app.get('/get-channel-data/:id', async (req, res) => {
         json: true
     };
     const result = await rp(options)
-    db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push':
-    {'history': result}}, { "upsert": true })
-    db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$set':
-    {'updateTime': new Date()}}, { "upsert": true })
-    res.json({'message': 'Channel updated'})
-})
+    const checkChannelInDB = await db.collection('channels').findOne({'channel_id': parseInt(req.params.id)})
+    const isChannelInfoUpdated = isDataUpdated(result, checkChannelInDB.history)
+    if(isChannelInfoUpdated) {
+            db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push':
+            {'history': result}}, { "upsert": true })
+            db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$set':
+            {'updateTime': new Date()}}, { "upsert": true })
+            res.json({'message': 'Channel updated'})
+
+        }
+        return res.json({'message': 'Channel already updated'})
+});
+
+const isDataUpdated = (newData, oldData) => {
+        return Object.keys(oldData).every(key => 
+          oldData[key] === newData[key])
+}
 app.delete('/delete-channel/:id', async (req, res) => {
     const result = await db.collection('channels').remove({channel_id: parseInt(req.params.id)})
     res.json(result)
@@ -61,9 +72,9 @@ app.delete('/delete-channel/:id', async (req, res) => {
 app.listen(3000, async () => {
     console.log('Server is working on 3000')
     db = await connectToDatabase().catch((err) => {
-        console.log("Not Connected to Database ERROR! ", err);
-        });
-});
+        console.log("Not Connected to Database ERROR! ", err)
+        })
+})
 
 const connectToDatabase = () => {
     const mongoClient = new MongoClient('mongodb://localhost:27017/', { useNewUrlParser: true });
