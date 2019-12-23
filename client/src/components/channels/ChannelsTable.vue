@@ -5,12 +5,19 @@
         :items-per-page="10"
         :sort-by="['lastUpdated']"
         :sort-desc="[true]"
-        @click:row="$emit('table-row-clicked', $event)"
         class="elevation-1"
     >
-    <template v-if="tableData" v-slot:items="props">
-        <tr class="red-status"></tr>
-    </template>
+    <template v-if="tableData" v-slot:item="{ item }">
+        <tr
+            @click="$emit('table-row-clicked', item)"
+            :class="{'red-status': checkStatus(item.lastUpdated) === 'red', 'orange-status': checkStatus(item.lastUpdated) === 'orange'  }"
+        >
+            <td>{{ item.title }}</td>
+            <td>{{ item.count }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ formatDate(item.lastUpdated) }}</td>
+        </tr>
+      </template>
     </v-data-table>
 </template>
  <script>
@@ -26,31 +33,24 @@
       return {
         headers: [
           {
-            text: 'Channel Name',
+            text: 'Название канала',
             align: 'left',
             sortable: false,
             value: 'title',
           },
-          { text: 'Subscribers', value: 'count' },
-          { text: 'Description', value: 'description', sortable: false, width: '60%'},
-          { text: 'Last Updated', value: 'lastUpdated' }
+          { text: 'Подписчики', value: 'count' },
+          { text: 'Описание', value: 'description', sortable: false, width: '60%'},
+          { text: 'Последнее обновление', value: 'lastUpdated' }
         ],
       }
     },
     methods: {
-        // generateTableData(tableDataArray) {
-        //     let responseData = []
-        //     tableDataArray.map((item, index) => {
-        //         let rowObject = {}
-        //         rowObject[0] = {
-        //             type: 'text',
-        //             class: ''
-        //         }
-        //     })
-        // }
         checkStatus(date) {
             const status = moment(date).fromNow()
             return !(status.includes('days') || status.includes('month')) ? 'red' : 'orange'
+    },
+    formatDate(date) {
+        return moment(date).startOf('minute').fromNow()
     }
   } 
 }
@@ -58,4 +58,6 @@
 <style lang="sass">
 .red-status
     background-color: red
+.orange-status
+    background-color: orange
 </style>
