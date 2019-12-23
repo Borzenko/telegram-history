@@ -49,7 +49,21 @@ app.get('/get-channel-data/:id', async (req, res) => {
     };
     const result = await rp(options)
     const checkChannelInDB = await db.collection('channels').findOne({'channel_id': parseInt(req.params.id)})
-    const isChannelInfoUpdated = isDataUpdated(result, checkChannelInDB.history)
+    const oldChannelData = checkChannelInDB.history[checkChannelInDB.history.length - 1]
+    const isChannelInfoUpdated = isDataUpdated(Object.values(result).splice(0,4), Object.values(oldChannelData).splice(0,4))
+    if(result.title !== oldChannelData.title || result.description !== oldChannelData.description) {
+        if(result.title !== oldChannelData.title) {
+            result.oldTitle = oldChannelData.title
+            result.lastUpdatedTitle = new Date()
+        }
+        if(result.description !== oldChannelData.description) {
+            result.oldDescription = oldChannelData.description
+            result.lastUpdatedDescription = new Date()
+        }
+    } else {
+        result.lastUpdatedDescription = oldChannelData.lastUpdatedDescription
+        result.lastUpdatedTitle = oldChannelData.lastUpdatedTitle
+    }
     if(!isChannelInfoUpdated) {
         db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push':
         {'history': result}}, { "upsert": true })
@@ -61,7 +75,7 @@ app.get('/get-channel-data/:id', async (req, res) => {
 });
 
 const isDataUpdated = (newData, oldData) => {
-    return Object.keys(oldData).every(key => 
+    return oldData.every(key => 
         oldData[key] === newData[key])
 }
 app.delete('/delete-channel/:id', async (req, res) => {
