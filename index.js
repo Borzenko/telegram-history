@@ -4,6 +4,7 @@ const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser')
 const rp = require('request-promise')
 const cors = require('cors')
+const cron = require('node-cron')
 app.use(bodyParser.json())
 app.use(cors())
 const joinChannelSchema = require('./validationSchemas/joinChannelSchema')
@@ -41,6 +42,9 @@ app.post('/join-channel', async ({ body }, res) => {
     }
     return res.json(checkChannelInDB)
 });
+// cron.schedule('00 30 * * * *', () => {
+
+// })
 app.get('/get-channel-data/:id', async (req, res) => {
     const options = {
         method: 'GET',
@@ -48,27 +52,39 @@ app.get('/get-channel-data/:id', async (req, res) => {
         json: true
     };
     const result = await rp(options)
+    let dbObj = {}
     const checkChannelInDB = await db.collection('channels').findOne({'channel_id': parseInt(req.params.id)})
     const oldChannelData = checkChannelInDB.history[checkChannelInDB.history.length - 1]
     const isChannelInfoUpdated = isDataUpdated(Object.values(result).splice(0,4), Object.values(oldChannelData).splice(0,4))
     if(result.title !== oldChannelData.title || result.description !== oldChannelData.description) {
         if(result.title !== oldChannelData.title) {
-            result.oldTitle = oldChannelData.title
-            result.lastUpdatedTitle = new Date()
+            dbObj.oldTitle = oldChannelData.title
+            dbObj.lastUpdatedTitle = new Date()
+        } else {
+            dbObj.lastUpdatedTitle = checkChannelInDB.lastUpdatedTitle
         }
         if(result.description !== oldChannelData.description) {
-            result.oldDescription = oldChannelData.description
-            result.lastUpdatedDescription = new Date()
+            dbObj.oldDescription = oldChannelData.description
+            dbObj.lastUpdatedDescription = new Date()
+        } else {
+            dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
         }
     } else {
-        result.lastUpdatedDescription = oldChannelData.lastUpdatedDescription
-        result.lastUpdatedTitle = oldChannelData.lastUpdatedTitle
+        dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
+        dbObj.lastUpdatedTitle = checkChannelInDB.lastUpdatedTitle
     }
     if(!isChannelInfoUpdated) {
         db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$push':
         {'history': result}}, { "upsert": true })
         db.collection('channels').updateOne({channel_id: parseInt(req.params.id) }, {'$set':
-        {'updateTime': new Date()}}, { "upsert": true })
+        {
+            'updateTime': new Date(),
+            'oldTitle' : dbObj.oldTitle,
+            'oldDescription': dbObj.oldDescription,
+            'lastUpdatedTitle': dbObj.lastUpdatedTitle,
+            'lastUpdatedDescription': dbObj.lastUpdatedDescription
+        }
+        }, { "upsert": true })
         res.json({'message': 'Channel updated'})
         }
         return res.json({'message': 'Channel already updated'})

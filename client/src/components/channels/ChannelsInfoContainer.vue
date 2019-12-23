@@ -45,7 +45,13 @@ export default {
                     title: item.history[item.history.length-1].title,
                     count: item.history[item.history.length-1].count,
                     description: item.history[item.history.length-1].description,
-                    lastUpdated: item.updateTime
+                    lastUpdated: item.updateTime,
+                    lastUpdatedDescription: item.lastUpdatedDescription,
+                    lastUpdatedTitle: item.lastUpdatedTitle,
+                    oldTitle: item.oldTitle,
+                    oldDescription: item.oldDescription
+                    
+
                 })
                 }
             });
@@ -60,6 +66,12 @@ export default {
     created() {
         this.getClientChannels()
     }
+    // mounted() {
+    //     setTimeout(() => {
+    //         this.channels = []
+    //         this.getClientChannels()
+    //     }, 10000)
+    // }
     
 }
 </script>

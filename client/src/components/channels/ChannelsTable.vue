@@ -50,7 +50,7 @@
             return !(status.includes('days') || status.includes('month')) ? 'red' : 'orange'
     },
     formatDate(date) {
-        return moment(date).startOf('minute').fromNow()
+        return moment(date).lang('ru').startOf('minute').fromNow()
     }
   } 
 }
