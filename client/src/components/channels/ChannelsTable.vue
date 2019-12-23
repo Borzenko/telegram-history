@@ -8,7 +8,7 @@
         @click:row="$emit('table-row-clicked', $event)"
         class="elevation-1"
     >
-    <template v-slot:items="props">
+    <template v-if="tableData" v-slot:items="props">
         <tr class="red-status"></tr>
     </template>
     </v-data-table>

@@ -11,7 +11,7 @@
                 <div v-if="oldChannelInfo">
                     <span class="bold">Old Channel Info</span>
                     <span v-for="(channel, index) in Object.keys(oldChannelInfo)" :key="index">
-                        <div>{{channel}} : {{channelInfo[channel]}} </div>
+                        <div>{{channel}} : {{oldChannelInfo[channel]}} </div>
                     </span>
                 </div>
                     <span class="bold">New Channel Info</span>
@@ -41,20 +41,23 @@ export default {
     },
     data() {
         return {
-            channelAllData: [],
             oldChannelInfo: null
         }
 
+    },
+    watch: {
+        channelInfo() {
+            this.getChannelData()
+        }
     },
     methods: {
         isDataUpdated(newData, oldData) {
             return Object.keys(oldData).every(key => 
                 oldData[key] === newData[key])
         },
-        test() {
+        getChannelData() {
         const dataForChannel = this.allChannelsInfo && this.channelInfo ? this.allChannelsInfo.filter(item => item.channel_id === this.channelInfo.channel_id) : []
         const data = dataForChannel ? dataForChannel[0].history[dataForChannel[0].history.length - 2] : {}
-        this.oldChannelInfo = data
          const res = data ? this.isDataUpdated(this.channelInfo, data) : false
          if(!res) {
              const obj = {
@@ -67,7 +70,7 @@ export default {
         }
     },
     created() {
-        this.test()
+        this.getChannelData()
     }
 }
 </script>
