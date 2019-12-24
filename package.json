@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@hapi/joi": "^16.1.8",
+    "assert": "^2.0.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "moment": "^2.24.0",
     "node-cron": "^2.0.3",
     "request-promise": "^4.2.5"
   }
