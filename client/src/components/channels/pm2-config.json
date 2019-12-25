@@ -1,0 +1,10 @@
+{
+    "apps": [
+        {
+            "name": "client",
+            "cwd": "./client",
+            "script": "npm",
+            "args" : "serve"
+        }
+    ]
+}
