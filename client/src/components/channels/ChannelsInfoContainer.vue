@@ -1,6 +1,8 @@
 <template>
     <v-flex class="info-container">
-        <add-channel-input />
+        <add-channel-input
+            @join-channel="joinNewChannel($event)"
+        />
         <channels-table
             :table-data="channels"
             @table-row-clicked="openInfoModal($event)"
@@ -12,6 +14,13 @@
             :all-channels-info="allData"
             @close-modal="showInfoModal=false"
         />
+        <v-flex class="sync-btn-container">
+            <v-btn
+                class="sync-btn"
+            >
+                Sync Data
+            </v-btn>
+        </v-flex>
     </v-flex>
 </template>
 
@@ -19,7 +28,7 @@
 import ChannelsTable from '../channels/ChannelsTable'
 import AddChannelInput from '../channels/AddChannelInput'
 import ShowChannelInfoModal from '../modals/ShowChannelInfoModal'
-import { getChannels } from '../../../services/channelService'
+import { getChannels, addNewChannel } from '../../../services/channelService'
 export default {
     components: {
         ChannelsTable,
@@ -60,6 +69,9 @@ export default {
         openInfoModal(data) {
             this.test = data
             this.showInfoModal = true
+        },
+        joinNewChannel(link) {
+            addNewChannel(link)
         }
 
     },
@@ -79,4 +91,8 @@ export default {
 <style lang="sass">
 .info-container
     padding: 32px
+.sync-btn-container
+    margin-top: 2rem
+    display: flex
+    justify-content: flex-end
 </style>

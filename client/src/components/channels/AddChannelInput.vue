@@ -11,6 +11,7 @@
             outlined
             color='red'
             class="add-channel-btn"
+            @click="$emit('join-channel', channelLink)"
           >
               Add Channel
           </v-btn>

@@ -1,9 +1,9 @@
 const rp = require('request-promise')
 const joinChannelSchema = require('./validationSchemas/joinChannelSchema')
 const moment = require('moment')
+const db = require('./db').collection('channels')
 
-
-const getChannelData = async (id, db) => {
+const getChannelData = async (id) => {
     const options = {
         method: 'GET',
         uri: `http://127.0.0.1:8000/get-channel-data/${id}`,
@@ -11,9 +11,10 @@ const getChannelData = async (id, db) => {
     };
     const result = await rp(options)
     let dbObj = {}
-    const checkChannelInDB = await db.collection('channels').findOne({'channel_id': parseInt(id)})
+    const checkChannelInDB = await (await db).findOne({'channel_id': parseInt(id)})
     const oldChannelData = checkChannelInDB.history[checkChannelInDB.history.length - 1]
-    const isChannelInfoUpdated = oldChannelData && result ? isDataUpdated(Object.values(result).splice(0,4), Object.values(oldChannelData).splice(0,4)) : false
+    const isChannelInfoUpdated = result && oldChannelData ? isDataUpdated(result, oldChannelData) : false
+    console.log(isChannelInfoUpdated)
     if(result.title !== oldChannelData.title || result.description !== oldChannelData.description) {
         if(result.title !== oldChannelData.title) {
             dbObj.oldTitle = oldChannelData.title
@@ -32,9 +33,9 @@ const getChannelData = async (id, db) => {
         dbObj.lastUpdatedTitle = checkChannelInDB.lastUpdatedTitle
     }
     if(!isChannelInfoUpdated) {
-        db.collection('channels').updateOne({channel_id: parseInt(id) }, {'$push':
+        await (await db).updateOne({channel_id: parseInt(id) }, {'$push':
         {'history': result}}, { "upsert": true })
-        db.collection('channels').updateOne({channel_id: parseInt(id) }, {'$set':
+        await (await db).updateOne({channel_id: parseInt(id) }, {'$set':
         {
             'updateTime': new Date(),
             'oldTitle' : dbObj.oldTitle,
@@ -53,11 +54,13 @@ const getChannelData = async (id, db) => {
 }
 
 const isDataUpdated = (newData, oldData) => {
-    return newData.every(key => 
-        newData[key] === oldData[key])
+    const fieldsToCompare = ['title', 'description']
+    return fieldsToCompare.every(key => 
+        oldData[key] === newData[key])
 }
 
-const joinChannel = async(channel, db) => {
+const joinChannel = async(channel) => {
+    console.log(channel)
     const validationResult = joinChannelSchema.validate(channel)
     if (validationResult.error) { return {'error': validationResult.error } }
     
@@ -73,10 +76,10 @@ const joinChannel = async(channel, db) => {
     if (response.error) {
         return {'error': response.error}
     }
-    const checkChannelInDB = await db.collection('channels').findOne({'channel_id': parseInt(response.channel_id)})
+    const checkChannelInDB = await (await db).findOne({'channel_id': parseInt(response.channel_id)})
     if (!checkChannelInDB) {
-        db.collection('channels').insert(response)
-        db.collection('channels').updateOne({channel_id: parseInt(response.channel_id) }, {'$set':
+        await (await db).insert(response)
+        await (await db).updateOne({channel_id: parseInt(response.channel_id) }, {'$set':
             {
                 'updateTime': new Date()
             }

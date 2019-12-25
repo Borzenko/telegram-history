@@ -15,12 +15,20 @@
                     <span>{{channelInfo.title}}</span>
                 </div>
                 <div v-if="channelInfo" class="description-container">
-                    <span><span class="bold">Текущее название:</span> {{channelInfo.title}} (было обновленно {{formatDate(channelInfo.lastUpdatedTitle)}})</span>
-                    <span class="sub-description">Старое название: {{channelInfo.oldTitle}}</span>
+                    <span><span class="bold">Текущее название:</span> {{channelInfo.title}} 
+                    <span v-if="channelInfo.lastUpdatedTitle"> (было обновленно {{ formatDate(channelInfo.lastUpdatedTitle) }})</span>
+                    <span v-else> (было обновленно {{ formatDate(channelInfo.lastUpdated )}})</span>
+                    </span>
+                    <span class="sub-description" v-if="channelInfo.oldTitle">Старое название: {{channelInfo.oldTitle}}</span>
                 </div>
                     <div class="description-container">
-                        <span><span class="bold">Текущее описание:</span> {{channelInfo.description}} (было обновленно {{formatDate(channelInfo.lastUpdatedDescription)}})</span>
-                        <span class="sub-description">Старое описание: {{channelInfo.oldDescription}}</span>
+                        <span><span class="bold" v-if="channelInfo.description">Текущее описание:</span> 
+                        <span> {{channelInfo.description}}</span> 
+                        <span v-if="channelInfo.lastUpdatedDescription"> (было обновленно {{formatDate(channelInfo.lastUpdatedDescription)}})</span>
+                        <span v-else> (было обновленно {{formatDate(channelInfo.lastUpdated)}})</span>
+
+                        </span>
+                        <span class="sub-description" v-if="channelInfo.oldDescription">Старое описание: {{channelInfo.oldDescription}}</span>
                     </div>
                     <div class="description-container">
                         <span><span class="bold">Количество участников:</span> {{channelInfo.count}}</span>
@@ -31,23 +39,27 @@
                         :items="tableData"
                         :sort-by="['lastUpdated']"
                         :sort-desc="[true]"
+                        :no-results-text="noDataText"
                         hide-default-footer
                         class="elevation-1"
                     >
                         <template v-slot:item="{ item }">
-                            <tr>
+                            <tr v-if="item.oldTitle">
                                 <td v-if="item.oldTitle">{{ item.oldTitle }}</td>
-                                <td v-else> - </td>
-                                <td>{{ item.history[item.history.length - 1].title }}</td>
+                                <td v-if="item.history">{{ item.history[item.history.length - 1].title }}</td>
                                 <td v-if="item.lastUpdatedTitle">{{ formatDate(item.lastUpdatedTitle) }}</td>
                                 <td v-else>{{ formatDate(item.updateTime) }}</td>
                             </tr>
-                            <tr>
-                                <td v-if="item.oldDescription">{{ item.oldDescription }}</td>
-                                <td v-else> - </td>
-                                <td>{{ item.history[item.history.length - 1].description }}</td>
+                            <tr v-if="item.oldDescription">
+                                <td>{{ item.oldDescription }}</td>
+                                <td v-if="item.history">{{ item.history[item.history.length - 1].description }}</td>
                                 <td v-if="item.lastUpdatedDescription">{{ formatDate(item.lastUpdatedDescription) }}</td>
                                 <td v-else>{{ formatDate(item.updateTime) }}</td>
+                            </tr>
+                            <tr v-if="!item.oldTitle && !item.oldDescription">
+                                <td></td>
+                                <td>{{noDataText}}</td>
+                                <td></td>
                             </tr>
                         </template>
                      </v-data-table>
@@ -57,7 +69,7 @@
 </template>
 
 <script>
- import moment from 'moment'
+import moment from 'moment'
 export default {
     props: {
         channelInfo: {
@@ -78,10 +90,11 @@ export default {
             oldChannelInfo: null,
             tableData: null,
             headers: [
-                { text: 'Старое значение', value: 'oldDescription', sortable: false, width: '30%'},
-                { text: 'Новое значение', value: 'description', sortable: false, width: '50%'},
-                { text: 'Последнее обновление', value: 'lastUpdated' }
-            ]
+                { text: 'Старое значение', value: 'oldDescription', sortable: false, width: '33%'},
+                { text: 'Новое значение', value: 'description', sortable: false, width: '33%'},
+                { text: 'Последнее обновление', value: 'lastUpdated', width: '30%'  }
+            ],
+            noDataText: "Канал был недавно создан. Истории изменений нет"
         }
 
     },
@@ -97,17 +110,7 @@ export default {
         },
         getChannelData() {
         const dataForChannel = this.allChannelsInfo && this.channelInfo ? this.allChannelsInfo.filter(item => item.channel_id === this.channelInfo.channel_id) : []
-        const data = dataForChannel ? dataForChannel[0].history[dataForChannel[0].history.length - 2] : {}
         this.tableData = dataForChannel
-         const res = data ? this.isDataUpdated(this.channelInfo, data) : false
-         if(!res) {
-             const obj = {
-                 title: data.title,
-                 count: data.count,
-                 description: data.description,
-             }
-             this.oldChannelInfo = obj
-         }
         },
         formatDate(date) {
           return moment(date).lang('ru').startOf('minute').fromNow()
