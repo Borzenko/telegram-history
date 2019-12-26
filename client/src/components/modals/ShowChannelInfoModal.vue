@@ -40,7 +40,7 @@
                      <v-data-table
                         :headers="headers"
                         :items="tableData"
-                        :sort-by="['lastUpdated']"
+                        :sort-by="['updateTime']"
                         :sort-desc="[true]"
                         :no-results-text="noDataText"
                         hide-default-footer
