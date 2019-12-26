@@ -4,11 +4,9 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const routes = require('./routes')
 const connect = require("./db").connect
-const { multerUploads, dataUri } = require('./multer')
-const { uploader, cloudinaryConfig } = require('./cloudinaryConfig')
+const { cloudinaryConfig } = require('./cloudinaryConfig')
 app.use(bodyParser.json())
 app.use(cors())
-// app.use(multerUploads)
 app.use(routes)
 app.use('*', cloudinaryConfig)
 

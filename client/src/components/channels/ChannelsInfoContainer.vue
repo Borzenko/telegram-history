@@ -8,9 +8,9 @@
             @table-row-clicked="openInfoModal($event)"
         />
         <show-channel-info-modal
-            v-if="allData && test"
+            v-if="allData && modalData"
             :show-modal="showInfoModal"
-            :channel-info="test"
+            :channel-info="modalData"
             :all-channels-info="allData"
             @close-modal="showInfoModal=false"
         />
@@ -38,9 +38,10 @@ export default {
     data() {
         return {
             channels: [],
-            test: null,
+            modalData: null,
             allData: null,
-            showInfoModal: false
+            showInfoModal: false,
+            isAddedNewChannel: false
         }
     },
     methods: {
@@ -55,23 +56,21 @@ export default {
             return res
         },
         openInfoModal(data) {
-            this.test = data
+            this.modalData = data
             this.showInfoModal = true
         },
         async joinNewChannel(link) {
-           await addNewChannel(link)
+           const channel = await addNewChannel(link)
+           // eslint-disable-next-line no-console
+           console.log(channel)
+        //    !channel.message ? this.channels.push(channel) : channel.message
+
         }
 
     },
     created() {
         this.getClientChannels()
     }
-    // mounted() {
-    //     setTimeout(() => {
-    //         this.channels = []
-    //         this.getClientChannels()
-    //     }, 10000)
-    // }
     
 }
 </script>

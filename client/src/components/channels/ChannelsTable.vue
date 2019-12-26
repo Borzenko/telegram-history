@@ -12,7 +12,15 @@
             @click="$emit('table-row-clicked', item)"
             :class="{'red-status': checkStatus(item.updateTime) === 'red', 'orange-status': checkStatus(item.updateTime) === 'orange'  }"
         >
-            <td>{{ item.history[item.history.length - 1].title }}</td>
+            <td>
+                <v-avatar
+                    size="36"
+                    class="table-avatar"
+                >
+                <img
+                    :src="item.history[item.history.length - 1].avatar"
+                />
+                </v-avatar>{{ item.history[item.history.length - 1].title }}</td>
             <td>{{ item.history[item.history.length - 1].count }}</td>
             <td>{{ item.history[item.history.length - 1].description }}</td>
             <td>{{ formatDate(item.updateTime) }}</td>
@@ -57,7 +65,9 @@
 </script>
 <style lang="sass">
 .red-status
-    background-color: red
+    background-color: rgba(238, 85, 101, .5 )
 .orange-status
     background-color: orange
+.table-avatar
+    padding-right: 20px
 </style>

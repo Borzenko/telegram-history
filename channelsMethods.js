@@ -16,8 +16,24 @@ const getChannelData = async (id) => {
     result.avatar = channelAvatar
     let dbObj = {}
     const checkChannelInDB = await (await db).findOne({'channel_id': parseInt(id)})
-    const oldChannelData = checkChannelInDB.history[checkChannelInDB.history.length - 1]
+    const oldChannelData = checkChannelInDB ? checkChannelInDB.history[checkChannelInDB.history.length - 1] : null
     const isChannelInfoUpdated = result && oldChannelData ? isDataUpdated(result, oldChannelData) : false
+    if(!checkChannelInDB && !oldChannelData && !isChannelInfoUpdated) {
+        await (await db).updateOne({channel_id: parseInt(id) }, {'$push':
+        {'history': result}}, { "upsert": true })
+        await (await db).updateOne({channel_id: parseInt(id) }, {'$set':
+        {
+            'updateTime': new Date(),
+            'oldTitle' : dbObj.oldTitle,
+            'oldDescription': dbObj.oldDescription,
+            'oldAvatar': dbObj.oldAvatar,
+            'lastUpdatedTitle': dbObj.lastUpdatedTitle,
+            'lastUpdatedDescription': dbObj.lastUpdatedDescription,
+            'lastUpdatedAvatar': dbObj.lastUpdatedAvatar
+        }
+        }, { "upsert": true })
+        return result
+    }
     if(!isChannelInfoUpdated) {
         if(result.title !== oldChannelData.title) {
             dbObj.oldTitle = oldChannelData.title
@@ -65,7 +81,7 @@ const getChannelData = async (id) => {
 }
 
 const isDataUpdated = (newData, oldData) => {
-    const fieldsToCompare = ['title', 'description']
+    const fieldsToCompare = ['title', 'description', 'avatar']
     return fieldsToCompare.every(key => 
         oldData[key] === newData[key])
 }
@@ -83,22 +99,25 @@ const joinChannel = async(channel) => {
         json: true
     }
     const response = await rp(options)
+    console.log(response)
+    const channelInfo = await getChannelData(response.channel_id)
     if (response.error) {
         return {'error': response.error}
     }
     const checkChannelInDB = await (await db).findOne({'channel_id': parseInt(response.channel_id)})
     if (!checkChannelInDB) {
-        await (await db).insert(response)
-        await (await db).updateOne({channel_id: parseInt(response.channel_id) }, {'$set':
+        await (await db).insert(channelInfo)
+        const newChannel = await (await db).updateOne({channel_id: parseInt(response.channel_id) }, {'$set':
             {
                 'updateTime': new Date()
             }
             }, { "upsert": true })
-        return {'message': 'join'}
+        return newChannel
     }
     return {
         'message': 'Channel already joined'
     }
+
 }
 const checkDate = (date) => {
     return moment(date).fromNow().includes('hours')

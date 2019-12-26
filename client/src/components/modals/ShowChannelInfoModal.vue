@@ -8,15 +8,29 @@
                 Информация о канале
             </v-card-title>
             <v-card-text v-if="channelInfo">
-                <div class="avatar-container">
+                <div class="avatar-container" v-if="channelInfo.history[channelInfo.history.length -1].avatar">
                     <v-avatar color="indigo" size="36">
                         <img
+                            v-if="!showOldAvatar"
                             :src="channelInfo.history[channelInfo.history.length -1].avatar"
-                            alt="John"
+                            alt="Сhannel avatar"
                         >
+                        <img
+                            v-else-if="showOldAvatar && channelInfo.oldAvatar"
+                            :src="channelInfo.oldAvatar"
+                            alt="Old channel avatar"
+                        />
                     </v-avatar>
                     <span>{{channelInfo.history[channelInfo.history.length -1].title}}</span>
                 </div>
+                <v-btn
+                        v-if="channelInfo.oldAvatar"
+                        outlined
+                        class="show-avatar-btn"
+                        @click="changeAvatar"
+                    >
+                        {{buttonText}}
+                    </v-btn>
                 <div v-if="channelInfo" class="description-container">
                     <span><span class="bold">Текущее название:</span> {{channelInfo.history[channelInfo.history.length -1].title}} 
                     <span v-if="channelInfo.lastUpdatedTitle"> (было обновленно {{ formatDate(channelInfo.lastUpdatedTitle) }})</span>
@@ -97,7 +111,9 @@ export default {
                 { text: 'Новое значение', value: 'description', sortable: false, width: '33%'},
                 { text: 'Последнее обновление', value: 'lastUpdated', width: '30%'  }
             ],
-            noDataText: "Канал был недавно создан. Истории изменений нет"
+            noDataText: "Канал был недавно создан. Истории изменений нет",
+            showOldAvatar: false,
+            buttonText: 'Показать старый аватар'
         }
 
     },
@@ -117,6 +133,10 @@ export default {
         },
         formatDate(date) {
           return moment(date).lang('ru').startOf('minute').fromNow()
+        },
+        changeAvatar() {
+            this.showOldAvatar = !this.showOldAvatar
+            return !this.showOldAvatar ? this.buttonText = 'Показать старый аватар' : this.buttonText = 'Показать текущий аватар'
         }
     },
     created() {
@@ -136,12 +156,15 @@ export default {
     font-weight: bold
 .avatar-container
     display: flex
-    justify-content: center
+    flex-direction: row
+    justify-content: flex-start
     margin: 1rem 0
 .avatar-container span
     padding: 5px 0 0 10px
     vertical-align: middle
     text-transform: capitalize
+.avatar-container .v-btn
+    margin-left: 20px
 .description-container
     display: flex
     flex-direction: column
@@ -154,4 +177,7 @@ export default {
     display: flex
     justify-content: center
     padding-bottom: 15px
+.show-avatar-btn
+    display: flex
+    align-items: center
 </style>
