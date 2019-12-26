@@ -11,7 +11,7 @@
             outlined
             color='red'
             class="add-channel-btn"
-            @click="$emit('join-channel', channelLink)"
+            @click="joinChannel"
           >
               Add Channel
           </v-btn>
@@ -23,6 +23,12 @@ export default {
     data() {
         return {
             channelLink: ''
+        }
+    },
+    methods: {
+        joinChannel() {
+            this.$emit('join-channel', this.channelLink)
+            this.channelLink = ''
         }
     }
 }

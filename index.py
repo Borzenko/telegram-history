@@ -138,19 +138,13 @@ async def getChannelInfo(id):
         chat_request = await client(GetFullChannelRequest(channel=channel))
         chat_full = chat_request.full_chat.about
         count = (await client.get_participants(id, limit=0)).total
-    #     test = await client.get_messages(channel.id, limit=1)
-    #     photo = await client.get_profile_photos(id)
-    #     channel_photo = await client.download_media(photo[0])
-    #     print(photo[0].sizes[0].location)
-    #     result = await client(functions.upload.GetFileRequest(location=photo[0].sizes[0].location,
-    #     limit=1024*1024,
-    #     offset=0
-    # ))
-        # print(test)
+        photo = await client.get_profile_photos(id)
+        channel_photo = await client.download_media(photo[0])
         return {
             "title": channel.title,
             "description": chat_full,
-            "count": count
+            "count": count,
+            "avatar": channel_photo
         }
     except telethon.errors.rpcerrorlist.FloodWaitError:
         return dumps({ 'error': 'FloodWaitError'})

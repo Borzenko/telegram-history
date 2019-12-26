@@ -10,28 +10,31 @@
             <v-card-text v-if="channelInfo">
                 <div class="avatar-container">
                     <v-avatar color="indigo" size="36">
-                        <span class="white--text headline"></span>
+                        <img
+                            :src="channelInfo.history[channelInfo.history.length -1].avatar"
+                            alt="John"
+                        >
                     </v-avatar>
-                    <span>{{channelInfo.title}}</span>
+                    <span>{{channelInfo.history[channelInfo.history.length -1].title}}</span>
                 </div>
                 <div v-if="channelInfo" class="description-container">
-                    <span><span class="bold">Текущее название:</span> {{channelInfo.title}} 
+                    <span><span class="bold">Текущее название:</span> {{channelInfo.history[channelInfo.history.length -1].title}} 
                     <span v-if="channelInfo.lastUpdatedTitle"> (было обновленно {{ formatDate(channelInfo.lastUpdatedTitle) }})</span>
-                    <span v-else> (было обновленно {{ formatDate(channelInfo.lastUpdated )}})</span>
+                    <span v-else> (было обновленно {{ formatDate(channelInfo.updateTime )}})</span>
                     </span>
                     <span class="sub-description" v-if="channelInfo.oldTitle">Старое название: {{channelInfo.oldTitle}}</span>
                 </div>
                     <div class="description-container">
-                        <span><span class="bold" v-if="channelInfo.description">Текущее описание:</span> 
-                        <span> {{channelInfo.description}}</span> 
+                        <span><span class="bold" v-if="channelInfo.history[channelInfo.history.length -1].description">Текущее описание:</span> 
+                        <span> {{channelInfo.history[channelInfo.history.length -1].description}}</span> 
                         <span v-if="channelInfo.lastUpdatedDescription"> (было обновленно {{formatDate(channelInfo.lastUpdatedDescription)}})</span>
-                        <span v-else> (было обновленно {{formatDate(channelInfo.lastUpdated)}})</span>
+                        <span v-else> (было обновленно {{formatDate(channelInfo.updateTime)}})</span>
 
                         </span>
                         <span class="sub-description" v-if="channelInfo.oldDescription">Старое описание: {{channelInfo.oldDescription}}</span>
                     </div>
                     <div class="description-container">
-                        <span><span class="bold">Количество участников:</span> {{channelInfo.count}}</span>
+                        <span><span class="bold">Количество участников:</span> {{channelInfo.history[channelInfo.history.length -1].count}}</span>
                     </div>
                     <span class="bold channel-title">История Изменений</span>
                      <v-data-table

@@ -2,6 +2,8 @@ const rp = require('request-promise')
 const joinChannelSchema = require('./validationSchemas/joinChannelSchema')
 const moment = require('moment')
 const db = require('./db').collection('channels')
+const { dataUri } = require('./multer')
+const { uploader } = require('./cloudinaryConfig')
 
 const getChannelData = async (id) => {
     const options = {
@@ -10,12 +12,13 @@ const getChannelData = async (id) => {
         json: true
     };
     const result = await rp(options)
+    const channelAvatar = await uploadChannelAvatar(result)
+    result.avatar = channelAvatar
     let dbObj = {}
     const checkChannelInDB = await (await db).findOne({'channel_id': parseInt(id)})
     const oldChannelData = checkChannelInDB.history[checkChannelInDB.history.length - 1]
     const isChannelInfoUpdated = result && oldChannelData ? isDataUpdated(result, oldChannelData) : false
-    console.log(isChannelInfoUpdated)
-    if(result.title !== oldChannelData.title || result.description !== oldChannelData.description) {
+    if(!isChannelInfoUpdated) {
         if(result.title !== oldChannelData.title) {
             dbObj.oldTitle = oldChannelData.title
             dbObj.lastUpdatedTitle = new Date()
@@ -28,11 +31,12 @@ const getChannelData = async (id) => {
         } else {
             dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
         }
-    } else {
-        dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
-        dbObj.lastUpdatedTitle = checkChannelInDB.lastUpdatedTitle
-    }
-    if(!isChannelInfoUpdated) {
+        if(result.avatar !== oldChannelData.avatar) {
+            dbObj.oldAvatar= oldChannelData.avatar
+            dbObj.lastUpdatedAvatar = new Date()
+        } else {
+            dbObj.lastUpdatedAvatar = checkChannelInDB.lastUpdatedAvatar
+        }
         await (await db).updateOne({channel_id: parseInt(id) }, {'$push':
         {'history': result}}, { "upsert": true })
         await (await db).updateOne({channel_id: parseInt(id) }, {'$set':
@@ -40,17 +44,24 @@ const getChannelData = async (id) => {
             'updateTime': new Date(),
             'oldTitle' : dbObj.oldTitle,
             'oldDescription': dbObj.oldDescription,
+            'oldAvatar': dbObj.oldAvatar,
             'lastUpdatedTitle': dbObj.lastUpdatedTitle,
-            'lastUpdatedDescription': dbObj.lastUpdatedDescription
+            'lastUpdatedDescription': dbObj.lastUpdatedDescription,
+            'lastUpdatedAvatar': dbObj.lastUpdatedAvatar
         }
         }, { "upsert": true })
         return {
             'message': 'channel updated'
         }
-        }
+
+    } else {
+        dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
+        dbObj.lastUpdatedTitle = checkChannelInDB.lastUpdatedTitle
+        dbObj.lastUpdatedAvatar = checkChannelInDB.lastUpdatedAvatar
         return {
             'message': 'Channel already updated'
         }
+    }
 }
 
 const isDataUpdated = (newData, oldData) => {
@@ -60,7 +71,6 @@ const isDataUpdated = (newData, oldData) => {
 }
 
 const joinChannel = async(channel) => {
-    console.log(channel)
     const validationResult = joinChannelSchema.validate(channel)
     if (validationResult.error) { return {'error': validationResult.error } }
     
@@ -93,6 +103,16 @@ const joinChannel = async(channel) => {
 const checkDate = (date) => {
     return moment(date).fromNow().includes('hours')
 
+}
+const uploadChannelAvatar = async(channel) => {
+    const file = dataUri(channel.avatar).fileName
+    return uploader.upload(file).then((result) => {
+    const image = result.url
+    return image
+}).catch((error) => {
+    console.log(error)
+    return {'error': error}
+})
 }
 
 module.exports = {

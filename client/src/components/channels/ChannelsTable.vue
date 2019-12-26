@@ -10,12 +10,12 @@
     <template v-if="tableData" v-slot:item="{ item }">
         <tr
             @click="$emit('table-row-clicked', item)"
-            :class="{'red-status': checkStatus(item.lastUpdated) === 'red', 'orange-status': checkStatus(item.lastUpdated) === 'orange'  }"
+            :class="{'red-status': checkStatus(item.updateTime) === 'red', 'orange-status': checkStatus(item.updateTime) === 'orange'  }"
         >
-            <td>{{ item.title }}</td>
-            <td>{{ item.count }}</td>
-            <td>{{ item.description }}</td>
-            <td>{{ formatDate(item.lastUpdated) }}</td>
+            <td>{{ item.history[item.history.length - 1].title }}</td>
+            <td>{{ item.history[item.history.length - 1].count }}</td>
+            <td>{{ item.history[item.history.length - 1].description }}</td>
+            <td>{{ formatDate(item.updateTime) }}</td>
         </tr>
       </template>
     </v-data-table>

@@ -49,19 +49,7 @@ export default {
             this.allData = res
             res.forEach(item => {
                 if(item.history.length) {
-                    this.channels.push({
-                    channel_id: item.channel_id,
-                    title: item.history[item.history.length-1].title,
-                    count: item.history[item.history.length-1].count,
-                    description: item.history[item.history.length-1].description,
-                    lastUpdated: item.updateTime,
-                    lastUpdatedDescription: item.lastUpdatedDescription,
-                    lastUpdatedTitle: item.lastUpdatedTitle,
-                    oldTitle: item.oldTitle,
-                    oldDescription: item.oldDescription
-                    
-
-                })
+                    this.channels.push(item)
                 }
             });
             return res
@@ -70,8 +58,8 @@ export default {
             this.test = data
             this.showInfoModal = true
         },
-        joinNewChannel(link) {
-            addNewChannel(link)
+        async joinNewChannel(link) {
+           await addNewChannel(link)
         }
 
     },
