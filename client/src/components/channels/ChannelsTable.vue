@@ -65,7 +65,7 @@
 </script>
 <style lang="sass">
 .red-status
-    background-color: rgba(238, 85, 101, .5 )
+    background-color: rgba(238, 85, 101, .11 )
 .orange-status
     background-color: orange
 .table-avatar

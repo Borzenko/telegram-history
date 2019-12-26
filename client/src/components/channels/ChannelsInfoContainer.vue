@@ -16,9 +16,10 @@
         />
         <v-flex class="sync-btn-container">
             <v-btn
+                outlined
                 class="sync-btn"
             >
-                Sync Data
+                Синхронизировать
             </v-btn>
         </v-flex>
     </v-flex>

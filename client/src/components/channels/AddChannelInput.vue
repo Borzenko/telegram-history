@@ -1,7 +1,7 @@
 <template>
     <v-flex class="add-channel-container">
         <v-text-field
-            label="Enter Telegram Channel Link"
+            label="Введите ссылку на телеграм канал"
             class="add-channel-input"
             v-model="channelLink"
             single-line
@@ -13,7 +13,7 @@
             class="add-channel-btn"
             @click="joinChannel"
           >
-              Add Channel
+              Добавить канал
           </v-btn>
     </v-flex>
 </template>
