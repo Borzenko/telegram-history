@@ -12,7 +12,7 @@
                     <v-avatar color="indigo" size="36">
                         <img
                             v-if="!showOldAvatar"
-                            :src="channelInfo.history[channelInfo.history.length -1].avatar"
+                            :src="channelInfo.history[channelInfo.history.length - 1].avatar"
                             alt="Сhannel avatar"
                         >
                         <img

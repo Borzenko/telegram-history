@@ -19,19 +19,7 @@ const getChannelData = async (id) => {
     const oldChannelData = checkChannelInDB ? checkChannelInDB.history[checkChannelInDB.history.length - 1] : null
     const isChannelInfoUpdated = result && oldChannelData ? isDataUpdated(result, oldChannelData) : false
     if(!checkChannelInDB && !oldChannelData && !isChannelInfoUpdated) {
-        await (await db).updateOne({channel_id: parseInt(id) }, {'$push':
-        {'history': result}}, { "upsert": true })
-        await (await db).updateOne({channel_id: parseInt(id) }, {'$set':
-        {
-            'updateTime': new Date(),
-            'oldTitle' : dbObj.oldTitle,
-            'oldDescription': dbObj.oldDescription,
-            'oldAvatar': dbObj.oldAvatar,
-            'lastUpdatedTitle': dbObj.lastUpdatedTitle,
-            'lastUpdatedDescription': dbObj.lastUpdatedDescription,
-            'lastUpdatedAvatar': dbObj.lastUpdatedAvatar
-        }
-        }, { "upsert": true })
+        await updateChannelInfoInDB(id, dbObj, result)
         return result
     }
     if(!isChannelInfoUpdated) {
@@ -53,19 +41,7 @@ const getChannelData = async (id) => {
         } else {
             dbObj.lastUpdatedAvatar = checkChannelInDB.lastUpdatedAvatar
         }
-        await (await db).updateOne({channel_id: parseInt(id) }, {'$push':
-        {'history': result}}, { "upsert": true })
-        await (await db).updateOne({channel_id: parseInt(id) }, {'$set':
-        {
-            'updateTime': new Date(),
-            'oldTitle' : dbObj.oldTitle,
-            'oldDescription': dbObj.oldDescription,
-            'oldAvatar': dbObj.oldAvatar,
-            'lastUpdatedTitle': dbObj.lastUpdatedTitle,
-            'lastUpdatedDescription': dbObj.lastUpdatedDescription,
-            'lastUpdatedAvatar': dbObj.lastUpdatedAvatar
-        }
-        }, { "upsert": true })
+        await updateChannelInfoInDB(id, dbObj, result)
         return result
 
     } else {
@@ -82,6 +58,21 @@ const isDataUpdated = (newData, oldData) => {
     const fieldsToCompare = ['title', 'description']
     return fieldsToCompare.every(key => 
         oldData[key] === newData[key])
+}
+const updateChannelInfoInDB = async (id, dbObj, requestResult) => {
+    await (await db).updateOne({channel_id: parseInt(id) }, {'$push':
+        {'history': requestResult}}, { "upsert": true })
+        await (await db).updateOne({channel_id: parseInt(id) }, {'$set':
+        {
+            'updateTime': new Date(),
+            'oldTitle' : dbObj.oldTitle,
+            'oldDescription': dbObj.oldDescription,
+            'oldAvatar': dbObj.oldAvatar,
+            'lastUpdatedTitle': dbObj.lastUpdatedTitle,
+            'lastUpdatedDescription': dbObj.lastUpdatedDescription,
+            'lastUpdatedAvatar': dbObj.lastUpdatedAvatar
+        }
+        }, { "upsert": true })
 }
 
 const joinChannel = async(channel) => {
@@ -121,14 +112,16 @@ const checkDate = (date) => {
 
 }
 const uploadChannelAvatar = async(channel) => {
-    const file = dataUri(channel.avatar).fileName
-    return uploader.upload(file).then((result) => {
-    const image = result.url
-    return image
-}).catch((error) => {
-    console.log(error)
-    return {'error': error}
-})
+    const file = channel.avatar ? dataUri(channel.avatar).fileName : null
+    if (file) {
+        return uploader.upload(file).then((result) => {
+            const image = result.url
+            return image
+        }).catch((error) => {
+            console.log(error)
+            return {'error': error}
+        })
+    }
 }
 const leaveChannel = async (id) => {
     const options = {
@@ -136,8 +129,8 @@ const leaveChannel = async (id) => {
         uri: `http://127.0.0.1:8000/delete-channel/${id}`,
         json: true
     }
-    await (await db).remove({channel_id: parseInt(id)})
     await rp(options)
+    await (await db).remove({channel_id: parseInt(id)})
 }
 
 module.exports = {
