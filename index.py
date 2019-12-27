@@ -152,7 +152,6 @@ async def getChannelInfo(id):
         #         client.download_media(message, media_path)
         #     print(idx, media_path)
         if(photo):
-            print(photo)
             channel_photo = await client.download_media(photo[0])
         else:
             channel_photo = None

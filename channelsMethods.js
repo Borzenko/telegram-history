@@ -20,7 +20,6 @@ const getChannelData = async (id) => {
     const isChannelInfoUpdated = result && oldChannelData ? isDataUpdated(result, oldChannelData) : false
     if(!checkChannelInDB && !oldChannelData && !isChannelInfoUpdated) {
         await updateChannelInfoInDB(id, dbObj, result)
-        return result
     }
     if(!isChannelInfoUpdated) {
         if(result.title !== oldChannelData.title) {
@@ -42,7 +41,6 @@ const getChannelData = async (id) => {
             dbObj.lastUpdatedAvatar = checkChannelInDB.lastUpdatedAvatar
         }
         await updateChannelInfoInDB(id, dbObj, result)
-        return result
 
     } else {
         dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
@@ -73,6 +71,7 @@ const updateChannelInfoInDB = async (id, dbObj, requestResult) => {
             'lastUpdatedAvatar': dbObj.lastUpdatedAvatar
         }
         }, { "upsert": true })
+        return requestResult
 }
 
 const joinChannel = async(channel) => {
