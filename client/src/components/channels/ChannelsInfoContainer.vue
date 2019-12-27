@@ -6,6 +6,7 @@
         <channels-table
             :table-data="channels"
             @table-row-clicked="openInfoModal($event)"
+            @update-channel="updateChannel($event)"
         />
         <show-channel-info-modal
             v-if="allData && modalData"
@@ -14,14 +15,14 @@
             :all-channels-info="allData"
             @close-modal="showInfoModal=false"
         />
-        <v-flex class="sync-btn-container">
+        <!-- <v-flex class="sync-btn-container">
             <v-btn
                 outlined
                 class="sync-btn"
             >
                 Синхронизировать
             </v-btn>
-        </v-flex>
+        </v-flex> -->
     </v-flex>
 </template>
 
@@ -29,7 +30,7 @@
 import ChannelsTable from '../channels/ChannelsTable'
 import AddChannelInput from '../channels/AddChannelInput'
 import ShowChannelInfoModal from '../modals/ShowChannelInfoModal'
-import { getChannels, addNewChannel } from '../../../services/channelService'
+import { getChannels, addNewChannel, updateChannelInfo } from '../../../services/channelService'
 export default {
     components: {
         ChannelsTable,
@@ -44,6 +45,12 @@ export default {
             showInfoModal: false,
             isAddedNewChannel: false
         }
+    },
+    watch: {
+        isAddedNewChannel() {
+            this.getClientChannels()
+        }
+
     },
     methods: {
         async getClientChannels() {
@@ -61,11 +68,18 @@ export default {
             this.showInfoModal = true
         },
         async joinNewChannel(link) {
-           const channel = await addNewChannel(link)
+           const channel = (await addNewChannel(link)).data
            // eslint-disable-next-line no-console
            console.log(channel)
-        //    !channel.message ? this.channels.push(channel) : channel.message
+           this.isAddedNewChannel = !this.isAddedNewChannel
+           this.channels = []
 
+        },
+        async updateChannel({ data, event }) {
+           event.stopPropagation();
+           await updateChannelInfo(data)
+           this.isAddedNewChannel = !this.isAddedNewChannel
+           this.channels = []
         }
 
     },

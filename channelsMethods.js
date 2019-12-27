@@ -66,9 +66,7 @@ const getChannelData = async (id) => {
             'lastUpdatedAvatar': dbObj.lastUpdatedAvatar
         }
         }, { "upsert": true })
-        return {
-            'message': 'channel updated'
-        }
+        return result
 
     } else {
         dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
@@ -81,7 +79,7 @@ const getChannelData = async (id) => {
 }
 
 const isDataUpdated = (newData, oldData) => {
-    const fieldsToCompare = ['title', 'description', 'avatar']
+    const fieldsToCompare = ['title', 'description']
     return fieldsToCompare.every(key => 
         oldData[key] === newData[key])
 }
@@ -99,7 +97,6 @@ const joinChannel = async(channel) => {
         json: true
     }
     const response = await rp(options)
-    console.log(response)
     const channelInfo = await getChannelData(response.channel_id)
     if (response.error) {
         return {'error': response.error}
@@ -133,9 +130,19 @@ const uploadChannelAvatar = async(channel) => {
     return {'error': error}
 })
 }
+const leaveChannel = async (id) => {
+    const options = {
+        method: 'DELETE',
+        uri: `http://127.0.0.1:8000/delete-channel/${id}`,
+        json: true
+    }
+    await (await db).remove({channel_id: parseInt(id)})
+    await rp(options)
+}
 
 module.exports = {
     getChannelData,
     joinChannel,
-    checkDate
+    checkDate,
+    leaveChannel
 }

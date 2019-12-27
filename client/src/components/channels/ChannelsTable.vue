@@ -14,7 +14,6 @@
         >
             <td>
                 <v-avatar
-                    size="36"
                     class="table-avatar"
                 >
                 <img
@@ -24,6 +23,15 @@
             <td>{{ item.history[item.history.length - 1].count }}</td>
             <td>{{ item.history[item.history.length - 1].description }}</td>
             <td>{{ formatDate(item.updateTime) }}</td>
+            <td>
+                <v-btn
+                    outlined
+                    class="update-channel-btn"
+                    @click="$emit('update-channel', { data: item.channel_id, event: $event })"
+                >
+                    Обновить
+                </v-btn>
+            </td>
         </tr>
       </template>
     </v-data-table>
@@ -47,7 +55,7 @@
             value: 'title',
           },
           { text: 'Подписчики', value: 'count' },
-          { text: 'Описание', value: 'description', sortable: false, width: '60%'},
+          { text: 'Описание', value: 'description', sortable: false, width: '45%'},
           { text: 'Последнее обновление', value: 'updateTime' }
         ],
       }
@@ -55,7 +63,7 @@
     methods: {
         checkStatus(date) {
             const status = moment(date).fromNow()
-            return !(status.includes('days') || status.includes('month')) ? 'red' : 'orange'
+            return !(status.includes('day') || status.includes('month')) ? 'red' : 'orange'
     },
     formatDate(date) {
         return moment(date).lang('ru').startOf('minute').fromNow()
@@ -69,5 +77,10 @@
 .orange-status
     background-color: orange
 .table-avatar
-    padding-right: 20px
+    margin-right: 20px
+.update-channel-btn
+    background-color: red
+.table-avatar
+    width: 40px !important
+    height: 40px !important
 </style>

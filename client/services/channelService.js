@@ -9,8 +9,12 @@ const addNewChannel = async (link) => {
     } 
     return await axios.post('http://localhost:3000/join-channel', body)
 }
+const updateChannelInfo = async (id) => {
+    return await axios.get(`http://localhost:3000/get-channel-data/${id}`)
+}
 
 export {
     getChannels,
-    addNewChannel
+    addNewChannel,
+    updateChannelInfo
 }

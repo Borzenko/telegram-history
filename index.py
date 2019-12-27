@@ -22,6 +22,7 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon import errors
 from telethon.tl.functions.channels import LeaveChannelRequest
+from telethon import functions, types
 # Telethon client
 client = TelegramClient('79192868958', api_id, api_hash)
 client.start()
@@ -148,13 +149,15 @@ async def getChannelInfo(id):
         }
     except telethon.errors.rpcerrorlist.FloodWaitError:
         return dumps({ 'error': 'FloodWaitError'})
+
 # @app.route('/delete-channel/<int:id>', methods=['DELETE'])
-# async def deleteChannel(): 
+# async def deleteChannel(id): 
 #     try:
-#         client(functions.messages.DeleteChatUserRequest(
-#         chat_id=chat_id,
-#         user_id='me'
-# ))
+#        for dialog in client.iter_dialogs():
+#         if dialog.id == id:
+#         dialog.delete()
+#     except telethon.errors.rpcerrorlist.FloodWaitError:
+#         return dumps({ 'error': 'FloodWaitError'})
 
 async def main():
     await hypercorn.asyncio.serve(app, hypercorn.Config())
