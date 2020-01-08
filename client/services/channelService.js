@@ -12,9 +12,13 @@ const addNewChannel = async (link) => {
 const updateChannelInfo = async (id) => {
     return await axios.get(`http://localhost:3000/get-channel-data/${id}`)
 }
+const synchronizeChannels = async() => {
+    return await axios.get(`http://localhost:3000/export-channels`)
+}
 
 export {
     getChannels,
     addNewChannel,
-    updateChannelInfo
+    updateChannelInfo,
+    synchronizeChannels
 }

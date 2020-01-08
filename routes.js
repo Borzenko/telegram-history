@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const db = require('./db').collection('channels')
-const {getChannelData,joinChannel, leaveChannel} = require('./channelsMethods')
+const {getChannelData,joinChannel, leaveChannel, exportClientChannels, filterDataForDB} = require('./channelsMethods')
 const { cloudinaryConfig } = require('./cloudinaryConfig')
 router.use('*', cloudinaryConfig)
 router.get('/channels', async (req, res) => {
@@ -25,6 +25,11 @@ router.get('/get-channel-data/:id', async (req, res) => {
 router.delete('/delete-channel/:id', async (req, res) => {
     leaveChannel(req.params.id)
     res.json('fkfk')
+})
+router.get('/export-channels', async (req, res) => {
+    const result = await exportClientChannels()
+    // await filterDataForDB(result.channels)
+    res.json(result)
 })
 
 module.exports = router

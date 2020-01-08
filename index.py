@@ -6,6 +6,7 @@ import os
 import asyncio
 import sys
 import telethon
+import time
 
 
 import hypercorn.asyncio, pymongo
@@ -163,6 +164,42 @@ async def getChannelInfo(id):
         }
     except telethon.errors.rpcerrorlist.FloodWaitError:
         return dumps({ 'error': 'FloodWaitError'})
+
+
+@app.route('/export-channels', methods=['GET'])
+async def exportChannels():
+    try:
+        array_chats = []
+        async for dialog in client.iter_dialogs():
+            id = dialog.message.to_id.channel_id
+            if int(id):
+                channel = await client.get_entity(PeerChannel(id))
+                chat_request = await client(GetFullChannelRequest(channel=channel))
+                chat_full = chat_request.full_chat.about
+                count = (await client.get_participants(id, limit=0)).total
+                photo = await client.get_profile_photos(id)
+                if(photo):
+                    channel_photo = await client.download_media(photo[0])
+                else:
+                    channel_photo = None
+                array_chats.append(
+                    {
+                        'title': dialog.name,
+                        'id': id,
+                        'count': count,
+                        'description': chat_full,
+                        'avatar': channel_photo
+                    }
+                )
+                time.sleep(1)
+            else:
+                return dumps({'error': 'Does not have chat id'})
+        return dumps({'channels': array_chats})
+    except telethon.errors.rpcerrorlist.FloodWaitError:
+        return dumps({ 'error': 'FloodWaitError'})
+
+
+
 
 # @app.route('/delete-channel/<int:id>', methods=['DELETE'])
 # async def deleteChannel(id): 

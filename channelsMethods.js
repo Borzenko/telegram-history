@@ -133,9 +133,49 @@ const leaveChannel = async (id) => {
     await (await db).remove({channel_id: parseInt(id)})
 }
 
+const exportClientChannels = async () => {
+    const options = {
+        method: 'GET',
+        uri: `http://127.0.0.1:8000/export-channels`,
+        json: true
+    }
+    const result =  await rp(options)
+    const newChannelsArray = await filterDataForDB(result.channels)
+    return newChannelsArray
+}
+const filterDataForDB = async(data) => {
+    data.forEach(async item => {
+        const channelAvatar = await uploadChannelAvatar(item)
+        const checkInDB = await (await db).findOne({
+            'channel_id': parseInt(item.id)
+        })
+        if (!checkInDB) {
+            await (await db).insert({
+                'channel_id': item.id,
+                'history': [{
+                    'title': item.title,
+                    'description': item.description,
+                    'count': item.count,
+                    'avatar': channelAvatar
+
+                }]
+            })
+            const newChannel = await (await db).updateOne({channel_id: parseInt(item.id) }, {'$set':
+                {
+                    'updateTime': new Date()
+                }
+                }, { "upsert": true })
+            return newChannel
+        }
+
+    })
+
+}
 module.exports = {
     getChannelData,
     joinChannel,
     checkDate,
-    leaveChannel
+    leaveChannel,
+    exportClientChannels,
+    filterDataForDB
 }

@@ -15,14 +15,15 @@
             :all-channels-info="allData"
             @close-modal="showInfoModal=false"
         />
-        <!-- <v-flex class="sync-btn-container">
+        <v-flex class="sync-btn-container">
             <v-btn
                 outlined
                 class="sync-btn"
+                @click="synchronizeChannelsInfo()"
             >
                 Синхронизировать
             </v-btn>
-        </v-flex> -->
+        </v-flex>
     </v-flex>
 </template>
 
@@ -30,7 +31,7 @@
 import ChannelsTable from '../channels/ChannelsTable'
 import AddChannelInput from '../channels/AddChannelInput'
 import ShowChannelInfoModal from '../modals/ShowChannelInfoModal'
-import { getChannels, addNewChannel, updateChannelInfo } from '../../../services/channelService'
+import { getChannels, addNewChannel, updateChannelInfo, synchronizeChannels } from '../../../services/channelService'
 export default {
     components: {
         ChannelsTable,
@@ -48,18 +49,20 @@ export default {
     },
     watch: {
         isAddedNewChannel() {
+            // eslint-disable-next-line no-console
+            console.log('watch')
             this.getClientChannels()
         }
 
     },
     methods: {
         async getClientChannels() {
+            // eslint-disable-next-line no-console
+            console.log('method')
             const res = (await getChannels()).data
             this.allData = res
             res.forEach(item => {
-                if(item.history.length) {
-                    this.channels.push(item)
-                }
+                this.channels.push(item)
             });
             return res
         },
@@ -76,10 +79,18 @@ export default {
 
         },
         async updateChannel({ data, event }) {
-           event.stopPropagation();
+           event.stopPropagation()
            await updateChannelInfo(data)
            this.isAddedNewChannel = !this.isAddedNewChannel
            this.channels = []
+        },
+        async synchronizeChannelsInfo() {
+           await synchronizeChannels()
+           // eslint-disable-next-line no-console
+           console.log('sych method')
+            this.isAddedNewChannel = !this.isAddedNewChannel
+            this.channels = []
+
         }
 
     },
