@@ -5,6 +5,14 @@
             "cwd": "./client",
             "script": "npm",
             "args" : "serve"
+        },
+        {
+            "name": "node-backend",
+            "script": "index.js" 
+        },
+        {
+            "name": "python-backend",
+            "script": "index.py" 
         }
     ]
 }
