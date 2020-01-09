@@ -5,9 +5,13 @@ const cors = require('cors')
 const routes = require('./routes')
 const connect = require("./db").connect
 const { cloudinaryConfig } = require('./cloudinaryConfig')
+app.use(function (req, res, next) {
+    console.log('Request Type:', req.url);
+    next();
+  });
 app.use(bodyParser.json())
 app.use(cors())
-app.use(routes)
+app.use('/api/', routes)
 app.use('*', cloudinaryConfig)
 
 app.listen(3000, async () => {

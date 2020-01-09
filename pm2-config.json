@@ -1,19 +1,14 @@
 {
     "apps": [
         {
-            "name": "client",
-            "cwd": "./client",
-            "script": "npm",
-            "args" : "serve"
-        },
-        {
             "name": "node-backend",
-            "script": "index.js" 
+            "script": "index.js"
         },
         {
             "name": "python-backend",
             "cmd": "index.py",
             "interpreter": "python3"
+
         }
     ]
 }
