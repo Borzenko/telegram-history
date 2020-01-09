@@ -12,7 +12,8 @@
         },
         {
             "name": "python-backend",
-            "script": "index.py" 
+            "cmd": "index.py",
+            "interpreter": "python3"
         }
     ]
 }

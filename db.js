@@ -1,6 +1,6 @@
 const Mongo = require('mongodb')
-const mongo_uri = 'mongodb://localhost:27017/telegram-history'
-
+const dotenv =  require('dotenv')
+dotenv.config()
 // const initDb = (callback) =>  {
 //     if (_db) {
 //         console.warn('Trying to init DB again!')
@@ -47,7 +47,7 @@ const mongo_uri = 'mongodb://localhost:27017/telegram-history'
 // }
 
 module.exports = {
-    connect(mongoDbUrl = mongo_uri) {
+    connect(mongoDbUrl = process.env.MONGO_URI) {
         console.log('connecting to the db')
         if (!this.db) {
             return Mongo.MongoClient.connect(mongoDbUrl, {
