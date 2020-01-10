@@ -86,8 +86,7 @@ const joinChannel = async(channel) => {
         json: true
     }
     const response = await rp(options)
-    console.log(response)
-    const channelInfo = await getChannelData(response.channel_id)
+    const channelInfo = response ? await getChannelData(response.channel_id) : null
     if (response.error) {
         return {'error': response.error}
     }

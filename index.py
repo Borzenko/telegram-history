@@ -120,12 +120,12 @@ async def joinChannel():
         channel = res.chats[0]
         count = ( await client.get_participants(channel.id, limit=0)).total
 
-        return { "channel_id": channel.id,
+        return dumps({ "channel_id": channel.id,
             "history": [{
                 "title": channel.title,
                 "count": count
             }]
-        }
+        })
     except telethon.errors.rpcerrorlist.UserAlreadyParticipantError: 
         return dumps({ 'error': 'UserAlreadyParticipantError'})
     except telethon.errors.rpcerrorlist.FloodWaitError:
@@ -156,12 +156,12 @@ async def getChannelInfo(id):
             channel_photo = await client.download_media(photo[0])
         else:
             channel_photo = None
-        return {
+        return dumps({
             "title": channel.title,
             "description": chat_full,
             "count": count,
             "avatar": channel_photo
-        }
+        })
     except telethon.errors.rpcerrorlist.FloodWaitError:
         return dumps({ 'error': 'FloodWaitError'})
 
@@ -191,7 +191,6 @@ async def exportChannels():
                         'avatar': channel_photo
                     }
                 )
-                time.sleep(1)
             else:
                 return dumps({'error': 'Does not have chat id'})
         return dumps({'channels': array_chats})

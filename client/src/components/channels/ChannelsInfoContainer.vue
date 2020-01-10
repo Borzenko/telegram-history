@@ -49,16 +49,12 @@ export default {
     },
     watch: {
         isAddedNewChannel() {
-            // eslint-disable-next-line no-console
-            console.log('watch')
             this.getClientChannels()
         }
 
     },
     methods: {
         async getClientChannels() {
-            // eslint-disable-next-line no-console
-            console.log('method')
             const res = (await getChannels()).data
             this.allData = res
             res.forEach(item => {
@@ -86,8 +82,6 @@ export default {
         },
         async synchronizeChannelsInfo() {
            await synchronizeChannels()
-           // eslint-disable-next-line no-console
-           console.log('sych method')
             this.isAddedNewChannel = !this.isAddedNewChannel
             this.channels = []
 
