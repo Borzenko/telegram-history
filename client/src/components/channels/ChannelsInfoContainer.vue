@@ -62,7 +62,9 @@ export default {
             const res = (await getChannels()).data
             this.allData = res
             res.forEach(item => {
-                this.channels.push(item)
+                if(item.history) {
+                    this.channels.push(item)
+                }
             });
             return res
         },
@@ -71,9 +73,7 @@ export default {
             this.showInfoModal = true
         },
         async joinNewChannel(link) {
-           const channel = (await addNewChannel(link)).data
-           // eslint-disable-next-line no-console
-           console.log(channel)
+           await addNewChannel(link)
            this.isAddedNewChannel = !this.isAddedNewChannel
            this.channels = []
 

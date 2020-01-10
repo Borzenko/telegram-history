@@ -48,9 +48,7 @@ const getChannelData = async (id) => {
         dbObj.lastUpdatedDescription = checkChannelInDB.lastUpdatedDescription
         dbObj.lastUpdatedTitle = checkChannelInDB.lastUpdatedTitle
         dbObj.lastUpdatedAvatar = checkChannelInDB.lastUpdatedAvatar
-        return {
-            'message': 'Channel already updated'
-        }
+        return dbObj
     }
 }
 
@@ -88,6 +86,7 @@ const joinChannel = async(channel) => {
         json: true
     }
     const response = await rp(options)
+    console.log(response)
     const channelInfo = await getChannelData(response.channel_id)
     if (response.error) {
         return {'error': response.error}
@@ -101,9 +100,6 @@ const joinChannel = async(channel) => {
             }
             }, { "upsert": true })
         return newChannel
-    }
-    return {
-        'message': 'Channel already joined'
     }
 
 }
