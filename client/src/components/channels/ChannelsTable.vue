@@ -79,7 +79,8 @@
 .table-avatar
     margin-right: 20px
 .update-channel-btn
-    background-color: red
+    border-color: red
+    color: red !important
 .table-avatar
     width: 40px !important
     height: 40px !important
