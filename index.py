@@ -27,7 +27,7 @@ from telethon import functions, types
 from telethon import TelegramClient, sync
 from telethon.tl.types import InputPeerChannel, PeerChannel, ChannelAdminLogEventsFilter, Channel, ChannelForbidden, Chat
 # Telethon client
-client_number = os.getenv('PHONE_NUMBER_PROD')
+client_number = os.getenv('PHONE_NUMBER')
 client = TelegramClient(client_number, api_id, api_hash)
 client.start()
 # Quart app
