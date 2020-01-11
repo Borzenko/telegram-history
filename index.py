@@ -7,8 +7,8 @@ import asyncio
 import sys
 import telethon
 import time
-
-
+from dotenv import load_dotenv
+load_dotenv()
 import hypercorn.asyncio, pymongo
 from quart import Quart, render_template_string, request, jsonify
 from quart_cors import cors
@@ -27,7 +27,8 @@ from telethon import functions, types
 from telethon import TelegramClient, sync
 from telethon.tl.types import InputPeerChannel, PeerChannel, ChannelAdminLogEventsFilter, Channel, ChannelForbidden, Chat
 # Telethon client
-client = TelegramClient('79192868958', api_id, api_hash)
+client_number = os.getenv('PHONE_NUMBER_PROD')
+client = TelegramClient(client_number, api_id, api_hash)
 client.start()
 # Quart app
 app = Quart(__name__)
