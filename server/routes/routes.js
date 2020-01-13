@@ -23,7 +23,7 @@ router.get('/get-channel-data/:id', async (req, res) => {
 
 
 router.delete('/delete-channel/:id', async (req, res) => {
-    const result = leaveChannel(req.params.id)
+    const result = await leaveChannel(req.params.id)
     res.json(result)
 })
 router.get('/export-channels', async (req, res) => {
