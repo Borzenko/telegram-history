@@ -202,17 +202,22 @@ async def exportChannels():
         return dumps({ 'error': 'FloodWaitError'})
 
 
+@app.route('/delete-channel/<int:id>', methods=['DELETE'])
+async def deleteChannel(id): 
+    try:
+       async for dialog in client.iter_dialogs():
+        try:
+            if dialog.message.to_id.channel_id and dialog.message.to_id.channel_id == id:
+                result = await dialog.delete()
+                print(result)
+                return dumps({
+                    'message': "Deleted"
+                })
+        except:
+            continue
+    except telethon.errors.rpcerrorlist.FloodWaitError:
+        return dumps({ 'error': 'FloodWaitError'})
 
-
-
-# @app.route('/delete-channel/<int:id>', methods=['DELETE'])
-# async def deleteChannel(id): 
-#     try:
-#        for dialog in client.iter_dialogs():
-#         if dialog.id == id:
-#         dialog.delete()
-#     except telethon.errors.rpcerrorlist.FloodWaitError:
-#         return dumps({ 'error': 'FloodWaitError'})
 
 async def main():
     await hypercorn.asyncio.serve(app, hypercorn.Config())

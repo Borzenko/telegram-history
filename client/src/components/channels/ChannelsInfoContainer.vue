@@ -7,6 +7,7 @@
             :table-data="channels"
             @table-row-clicked="openInfoModal($event)"
             @update-channel="updateChannel($event)"
+            @delete-channel="confirmDeleting($event)"
         />
         <show-channel-info-modal
             v-if="allData && modalData"
@@ -24,6 +25,15 @@
                 Синхронизировать
             </v-btn>
         </v-flex>
+        <confirm-modal
+            :modal-title="'Предупреждение'"
+            :modal-text="'Вы уверены что хотите удалить канал? После удаления вы не сможете получать информацию об этом канале'"
+            :width="'50%'"
+            :max-width="'50%'"
+            :show-modal="showConfirmModal"
+            @confirm-deleting="deleteChannel(id)"
+            @close-modal="showConfirmModal=false"
+        />
     </v-flex>
 </template>
 
@@ -31,12 +41,14 @@
 import ChannelsTable from '../channels/ChannelsTable'
 import AddChannelInput from '../channels/AddChannelInput'
 import ShowChannelInfoModal from '../modals/ShowChannelInfoModal'
-import { getChannels, addNewChannel, updateChannelInfo, synchronizeChannels } from '../../../services/channelService'
+import ConfirmModal from '../modals/ConfirmModal'
+import { getChannels, addNewChannel, updateChannelInfo, synchronizeChannels, deleteChannel } from '../../../services/channelService'
 export default {
     components: {
         ChannelsTable,
         AddChannelInput,
-        ShowChannelInfoModal
+        ShowChannelInfoModal,
+        ConfirmModal
     },
     data() {
         return {
@@ -44,12 +56,18 @@ export default {
             modalData: null,
             allData: null,
             showInfoModal: false,
-            isAddedNewChannel: false
+            isAddedNewChannel: false,
+            showConfirmModal: false,
+            isDeleted: false,
+            id: null
         }
     },
     watch: {
         isAddedNewChannel() {
             this.getClientChannels()
+        },
+        isDeleted() {
+            this.confirmDeleting()
         }
 
     },
@@ -85,6 +103,21 @@ export default {
             this.isAddedNewChannel = !this.isAddedNewChannel
             this.channels = []
 
+        },
+        async deleteChannel() {
+            const result = await deleteChannel(this.id)
+            setTimeout(() => {
+                if(result) {
+                this.isAddedNewChannel = !this.isAddedNewChannel
+                this.channels = []
+            }
+            }, 1000)
+            this.showConfirmModal = false
+        },
+        async confirmDeleting({ data, event }) {
+            this.id = data
+            event.stopPropagation()
+            this.showConfirmModal=true
         }
 
     },

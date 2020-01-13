@@ -2,9 +2,9 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const routes = require('./routes')
+const routes = require('./routes/routes')
 const connect = require("./db").connect
-const { cloudinaryConfig } = require('./cloudinaryConfig')
+const { cloudinaryConfig } = require('./methods/cloudinaryConfig')
 app.use(function (req, res, next) {
     console.log('Request Type:', req.url);
     next();

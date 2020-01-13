@@ -32,6 +32,13 @@
                     Обновить
                 </v-btn>
             </td>
+            <td>
+                <v-icon
+                    @click="$emit('delete-channel', { data: item.channel_id, event: $event })"
+                >
+                    mdi-delete
+                </v-icon>
+            </td>
         </tr>
       </template>
     </v-data-table>

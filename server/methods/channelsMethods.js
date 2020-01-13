@@ -1,7 +1,7 @@
 const rp = require('request-promise')
-const joinChannelSchema = require('./validationSchemas/joinChannelSchema')
+const joinChannelSchema = require('../validationSchemas/joinChannelSchema')
 const moment = require('moment')
-const db = require('./db').collection('channels')
+const db = require('../db').collection('channels')
 const { dataUri } = require('./multer')
 const { uploader } = require('./cloudinaryConfig')
 
@@ -53,7 +53,7 @@ const getChannelData = async (id) => {
 }
 
 const isDataUpdated = (newData, oldData) => {
-    const fieldsToCompare = ['title', 'description']
+    const fieldsToCompare = ['title', 'description', 'avatar']
     return fieldsToCompare.every(key => 
         oldData[key] === newData[key])
 }
@@ -124,7 +124,8 @@ const leaveChannel = async (id) => {
         uri: `http://127.0.0.1:8000/delete-channel/${id}`,
         json: true
     }
-    await rp(options)
+    const res = await rp(options)
+    console.log(res)
     await (await db).remove({channel_id: parseInt(id)})
 }
 
