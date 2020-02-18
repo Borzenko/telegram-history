@@ -2,7 +2,7 @@
     <v-data-table
         :headers="headers"
         :items="tableData"
-        :items-per-page="10"
+        :items-per-page="100"
         :sort-by="['updateTime']"
         :sort-desc="[true]"
         class="elevation-1"
@@ -64,7 +64,7 @@
           { text: 'Подписчики', value: 'count' },
           { text: 'Описание', value: 'description', sortable: false, width: '45%'},
           { text: 'Последнее обновление', value: 'updateTime' }
-        ],
+        ]
       }
     },
     methods: {
