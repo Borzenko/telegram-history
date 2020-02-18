@@ -120,7 +120,6 @@ async def joinChannel():
 
         channel = res.chats[0]
         count = ( await client.get_participants(channel.id, limit=0)).total
-
         return dumps({ "channel_id": channel.id,
             "history": [{
                 "title": channel.title,
@@ -144,19 +143,12 @@ from telethon import functions, types
 async def getChannelInfo(id):
     try:
         channel = await client.get_entity(PeerChannel(id))
-
-
         chat_request = await client(GetFullChannelRequest(channel=channel))
+        photo = chat_request.full_chat.chat_photo
         chat_full = chat_request.full_chat.about
         count = (await client.get_participants(id, limit=0)).total
-        photo = await client.get_profile_photos(id)
-        # async for idx, message in enumerate(client.iter_messages(channel)):
-        #     if(message.file):
-        #         media_path = 'downloads/' + message.file.id + exts[message.file.mime_type]
-        #         client.download_media(message, media_path)
-        #     print(idx, media_path)
         if(photo):
-            channel_photo = await client.download_media(photo[0])
+            channel_photo = await client.download_media(photo)
         else:
             channel_photo = None
         return dumps({
