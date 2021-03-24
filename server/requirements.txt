@@ -26,7 +26,7 @@ pymongo==3.10.0
 python-dotenv==0.10.3
 Quart==0.10.0
 Quart-CORS==0.2.0
-rsa==4.0
+rsa==4.1
 six==1.13.0
 sortedcontainers==2.1.0
 Telethon==1.10.9
